@@ -1,6 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import MusicPlayerControls from "@/components/music-player-controls"
+import { useMusic } from "@/contexts/music-context"
 
 interface IntroScreenProps {
   onEnter: () => void
@@ -11,6 +13,7 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number; duration: number }>>([])
   const [mounted, setMounted] = useState(false)
   const [countdown, setCountdown] = useState(5)
+  const { play } = useMusic()
 
   // Generate particles for desktop only
   useEffect(() => {
@@ -27,25 +30,25 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
     setMounted(true)
   }, [])
 
-  // Auto sign in countdown
-  useEffect(() => {
-    if (countdown <= 0) {
-      return
-    }
+  // Auto sign in countdown - DISABLED
+  // useEffect(() => {
+  //   if (countdown <= 0) {
+  //     return
+  //   }
 
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        const newCount = prev - 1
-        if (newCount <= 0) {
-          setTimeout(() => onEnter(), 0)
-          return 0
-        }
-        return newCount
-      })
-    }, 1000)
+  //   const timer = setInterval(() => {
+  //     setCountdown((prev) => {
+  //       const newCount = prev - 1
+  //       if (newCount <= 0) {
+  //         setTimeout(() => onEnter(), 0)
+  //         return 0
+  //       }
+  //       return newCount
+  //     })
+  //   }, 1000)
 
-    return () => clearInterval(timer)
-  }, [onEnter])
+  //   return () => clearInterval(timer)
+  // }, [onEnter])
 
   // Keyboard listener
   useEffect(() => {
@@ -66,15 +69,48 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
     setShowPassword(!showPassword)
   }
 
-  const handleSignIn = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleSignIn = (e?: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
     console.log("Sign In clicked!") // Debug
+    
+    // Play nhạc
+    play().catch(() => {
+      // Silent fail
+    })
+    
+    onEnter()
+  }
+
+  const handleScreenClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement
+    
+    // Skip nếu click vào music player (để controls hoạt động)
+    if (target.closest('[data-music-player]')) {
+      return
+    }
+    
+    // Click vào bất kỳ đâu khác → vào workspace và play nhạc
+    console.log("Screen clicked anywhere - entering workspace and playing music")
+    
+    // Play nhạc
+    play().catch(() => {
+      // Silent fail
+    })
+    
+    // Vào workspace
     onEnter()
   }
 
   return (
-    <div className="relative w-screen h-screen bg-black flex items-center justify-center overflow-hidden">
+    <div 
+      className="relative w-screen h-screen bg-black flex items-center justify-center overflow-hidden cursor-pointer" 
+      style={{ isolation: 'isolate' }}
+      onClick={handleScreenClick}
+      onTouchStart={handleScreenClick}
+    >
       {/* Background with blur - FPT image */}
       <div
         className="absolute inset-0"
@@ -108,12 +144,12 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
       )}
 
       {/* Login Card - Centered */}
-      <div className="relative z-10 w-full max-w-md px-6 sm:px-8 animate-fade-in-up-desktop">
-        <div className="relative">
+      <div className="relative z-[100] w-full max-w-md px-6 sm:px-8 animate-fade-in-up-desktop">
+        <div className="relative z-[100]">
           {/* Animated Gradient Border - Desktop Only */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-orange-600/30 opacity-75 blur-xl animate-gradient-border-desktop hidden lg:block" />
           
-          <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 sm:p-10 animate-card-glow-desktop z-10">
+          <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 sm:p-10 animate-card-glow-desktop z-[100]">
             {/* Avatar - Adjusted to show face better */}
             <div className="flex justify-center mb-6">
               <div className="relative animate-bounce-in-desktop">
@@ -211,8 +247,8 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
             </div>
           </div>
 
-          {/* Countdown Timer */}
-          <div className="mb-4 text-center">
+          {/* Countdown Timer - DISABLED */}
+          {/* <div className="mb-4 text-center">
             <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
               <div className="relative w-10 h-10 sm:w-12 sm:h-12">
                 <svg className="w-10 h-10 sm:w-12 sm:h-12 transform -rotate-90" viewBox="0 0 36 36">
@@ -244,35 +280,71 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
                 Auto sign in in {countdown}s
               </span>
             </div>
-          </div>
+          </div> */}
 
-          {/* Sign In Button */}
-          <button
-            type="button"
-            onClick={handleSignIn}
-            onTouchStart={handleSignIn}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-95 group relative overflow-hidden cursor-pointer z-50"
-            style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
-          >
-            {/* Shimmer Effect - Desktop Only */}
-            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent hidden lg:block" />
-            <span className="relative z-10 flex items-center justify-center gap-2">
-              🔓 Sign In Now
-              <svg
-                className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </span>
-          </button>
+          {/* Sign In Button Wrapper */}
+          <div className="relative z-[10000] mb-0">
+            <button
+              type="button"
+              onTouchStart={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Touch Start - Sign In")
+                handleSignIn(e)
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Touch End - Sign In")
+                handleSignIn(e)
+              }}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Click - Sign In")
+                handleSignIn(e)
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                console.log("Mouse Down - Sign In")
+                handleSignIn(e)
+              }}
+              className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-500 hover:to-orange-500 active:from-purple-700 active:to-orange-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-[0.98] group relative overflow-visible cursor-pointer z-[10000] pointer-events-auto select-none"
+              style={{ 
+                touchAction: 'manipulation', 
+                WebkitTapHighlightColor: 'transparent',
+                WebkitTouchCallout: 'none',
+                userSelect: 'none',
+                WebkitUserSelect: 'none',
+                MozUserSelect: 'none',
+                msUserSelect: 'none',
+                position: 'relative',
+                zIndex: 10000,
+                isolation: 'isolate'
+              }}
+              aria-label="Sign In"
+            >
+              {/* Shimmer Effect - Desktop Only */}
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent hidden lg:block" />
+              <span className="relative z-10 flex items-center justify-center gap-2 pointer-events-none">
+                🔓 Sign In Now
+                <svg
+                  className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 7l5 5m0 0l-5 5m5-5H6"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
 
           {/* Hint */}
           <p className="text-center text-white/50 text-xs mt-4 pointer-events-none">
@@ -280,6 +352,11 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
           </p>
           </div>
         </div>
+      </div>
+
+      {/* Music Player - Top Right */}
+      <div data-music-player className="absolute top-4 right-4 z-[50] sm:top-6 sm:right-6 pointer-events-auto">
+        <MusicPlayerControls />
       </div>
 
       {/* System Info - Bottom */}

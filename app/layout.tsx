@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
+import MusicProviderWrapper from "@/components/music-provider-wrapper"
 
 import { Inter as V0_Font_Inter, Geist_Mono as V0_Font_Geist_Mono, Source_Serif_4 as V0_Font_Source_Serif_4 } from 'next/font/google'
 
@@ -44,7 +45,9 @@ export default function RootLayout({
         <meta charSet="utf-8" />
       </head>
       <body className="font-sans antialiased" suppressHydrationWarning={true}>
-        {children}
+        <MusicProviderWrapper>
+          {children}
+        </MusicProviderWrapper>
         <Analytics />
       </body>
     </html>

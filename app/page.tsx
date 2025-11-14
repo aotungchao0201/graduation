@@ -22,34 +22,34 @@ export default function Home() {
       }
     >
       <div className="w-screen h-screen overflow-hidden perspective">
-        <div
-          className={`absolute inset-0 transition-all duration-1000 ease-in ${
-            showWorkspace ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
-          style={{
-            transform: showWorkspace ? "scale(0) translate(50%, 50%)" : "scale(1) translate(0, 0)",
-            transformStyle: "preserve-3d",
-            transformOrigin: "center center",
-          }}
-        >
-          <IntroScreen onEnter={() => setShowWorkspace(true)} />
-        </div>
+          <div
+            className={`absolute inset-0 transition-all duration-1000 ease-in ${
+              showWorkspace ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+            style={{
+              transform: showWorkspace ? "scale(0) translate(50%, 50%)" : "scale(1) translate(0, 0)",
+              transformStyle: "preserve-3d",
+              transformOrigin: "center center",
+            }}
+          >
+            <IntroScreen onEnter={() => setShowWorkspace(true)} />
+          </div>
 
-        <div
-          className={`absolute inset-0 transition-all duration-1000 ease-out ${
-            showWorkspace ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
-          style={{
-            transform: showWorkspace
-              ? "perspective(1200px) scale(1) rotateX(0deg)"
-              : "perspective(1200px) scale(1.2) rotateX(15deg)",
-            transformStyle: "preserve-3d",
-            transformOrigin: "center center",
-          }}
-        >
-          <DesktopWorkspace />
+          <div
+            className={`absolute inset-0 transition-all duration-1000 ease-out ${
+              showWorkspace ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            style={{
+              transform: showWorkspace
+                ? "perspective(1200px) scale(1) rotateX(0deg)"
+                : "perspective(1200px) scale(1.2) rotateX(15deg)",
+              transformStyle: "preserve-3d",
+              transformOrigin: "center center",
+            }}
+          >
+            <DesktopWorkspace />
+          </div>
         </div>
-      </div>
     </ClientOnly>
   )
 }

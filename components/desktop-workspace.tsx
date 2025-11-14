@@ -9,6 +9,7 @@ import ThanksModal from "@/components/thanks-modal"
 import GraduationModal from "@/components/graduation-modal"
 import InteractiveOnboarding from "@/components/interactive-onboarding"
 import { LabDialog, AchievementsDialog, MemoriesDialog, OJTDialog } from "@/components/journey-dialogs"
+import MusicPlayerControls from "@/components/music-player-controls"
 
 export default function DesktopWorkspace() {
   const [openModals, setOpenModals] = useState<Set<string>>(new Set())
@@ -98,6 +99,11 @@ export default function DesktopWorkspace() {
             Trần Tiến Cường - SE172522
           </h1>
           <p className="text-cyan-300 text-sm sm:text-base">Graduation Invite Workspace</p>
+        </div>
+
+        {/* Floating Music Player - Top Right */}
+        <div className="fixed top-4 right-4 z-40 sm:top-6 sm:right-6">
+          <MusicPlayerControls />
         </div>
 
         {/* Quick Access Title */}
