@@ -10,6 +10,7 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; delay: number; duration: number }>>([])
   const [mounted, setMounted] = useState(false)
+  const [countdown, setCountdown] = useState(5)
 
   // Generate particles for desktop only
   useEffect(() => {
@@ -26,6 +27,26 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
     setMounted(true)
   }, [])
 
+  // Auto sign in countdown
+  useEffect(() => {
+    if (countdown <= 0) {
+      return
+    }
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        const newCount = prev - 1
+        if (newCount <= 0) {
+          setTimeout(() => onEnter(), 0)
+          return 0
+        }
+        return newCount
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [onEnter])
+
   // Keyboard listener
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -38,14 +59,14 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
     return () => window.removeEventListener("keydown", handleKeyPress)
   }, [onEnter])
 
-  const handleEyeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleEyeClick = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.stopPropagation()
     console.log("Eye clicked!") // Debug
     setShowPassword(!showPassword)
   }
 
-  const handleSignIn = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSignIn = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.preventDefault()
     e.stopPropagation()
     console.log("Sign In clicked!") // Debug
@@ -92,7 +113,7 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
           {/* Animated Gradient Border - Desktop Only */}
           <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-600/30 via-pink-600/30 to-orange-600/30 opacity-75 blur-xl animate-gradient-border-desktop hidden lg:block" />
           
-          <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 sm:p-10 animate-card-glow-desktop">
+          <div className="relative bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 sm:p-10 animate-card-glow-desktop z-10">
             {/* Avatar - Adjusted to show face better */}
             <div className="flex justify-center mb-6">
               <div className="relative animate-bounce-in-desktop">
@@ -146,7 +167,9 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
               <button
                 type="button"
                 onClick={handleEyeClick}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors p-2 rounded hover:bg-white/10 cursor-pointer z-20 pointer-events-auto"
+                onTouchStart={handleEyeClick}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors p-2 rounded hover:bg-white/10 cursor-pointer z-30 pointer-events-auto"
+                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
@@ -188,16 +211,53 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
             </div>
           </div>
 
+          {/* Countdown Timer */}
+          <div className="mb-4 text-center">
+            <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 transform -rotate-90" viewBox="0 0 36 36">
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.1)"
+                    strokeWidth="3"
+                  />
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeDasharray={`${(countdown / 5) * 100.53}, 100.53`}
+                    strokeLinecap="round"
+                    className="text-purple-400 transition-all duration-1000"
+                  />
+                </svg>
+                <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-sm sm:text-base">
+                  {countdown}
+                </span>
+              </div>
+              <span className="text-white/70 text-sm sm:text-base font-medium">
+                Auto sign in in {countdown}s
+              </span>
+            </div>
+          </div>
+
           {/* Sign In Button */}
           <button
             type="button"
             onClick={handleSignIn}
-            className="w-full py-3 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-95 group relative overflow-hidden cursor-pointer z-20 pointer-events-auto"
+            onTouchStart={handleSignIn}
+            className="w-full py-3 bg-gradient-to-r from-purple-600 to-orange-600 hover:from-purple-500 hover:to-orange-500 text-white font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 active:scale-95 group relative overflow-hidden cursor-pointer z-50"
+            style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
           >
             {/* Shimmer Effect - Desktop Only */}
             <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent hidden lg:block" />
             <span className="relative z-10 flex items-center justify-center gap-2">
-              🔓 Sign In
+              🔓 Sign In Now
               <svg
                 className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity transform group-hover:translate-x-1"
                 fill="none"
@@ -215,8 +275,8 @@ export default function IntroScreen({ onEnter }: IntroScreenProps) {
           </button>
 
           {/* Hint */}
-          <p className="text-center text-white/50 text-xs mt-4 animate-pulse">
-            Press Enter to sign in
+          <p className="text-center text-white/50 text-xs mt-4 pointer-events-none">
+            Or tap Sign In Now to enter immediately
           </p>
           </div>
         </div>
